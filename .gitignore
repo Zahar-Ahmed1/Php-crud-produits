@@ -1,24 +1,26 @@
-# Fichiers de configuration sensibles
-config/database.local.php
+# Fichiers sensibles
+config/database.php
+config/database.prod.php
+config/jwt.php
 
-# Fichiers de logs
+# Backups
+database.sql.bak
+
+# Tokens, clés, logs
+*.key
+*.env
 *.log
-logs/
 
-# Fichiers temporaires
-*.tmp
-*.temp
-.DS_Store
-Thumbs.db
+# Sessions & uploads
+sessions/
+uploads/
 
-# IDE
-.idea/
-.vscode/
-*.swp
-*.swo
-*~
+# Cache
+vendor/
+node_modules/
 
-# Environnement
-.env
-.env.local
+config/database.php
+config/database.prod.php
+config/jwt.php
+database.sql.bak
 
