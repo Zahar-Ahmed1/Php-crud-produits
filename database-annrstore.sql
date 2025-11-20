@@ -1,7 +1,16 @@
--- Base de données pour l'application de gestion de produits
-CREATE DATABASE IF NOT EXISTS products_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+-- Script SQL pour annrstore.com
+-- Base de données : u899993703_produits
+-- Compatible avec le service Angular ProductsService
 
-USE products_db;
+-- Table des utilisateurs
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(50) NOT NULL DEFAULT 'admin',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_username (username)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Table des catégories
 CREATE TABLE IF NOT EXISTS categories (
@@ -13,11 +22,10 @@ CREATE TABLE IF NOT EXISTS categories (
     parent_id VARCHAR(100) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_parent_id (parent_id),
-    FOREIGN KEY (parent_id) REFERENCES categories(id) ON DELETE SET NULL
+    INDEX idx_parent_id (parent_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Table des produits (structure complète)
+-- Table des produits (structure complète compatible avec Angular ProductsService)
 CREATE TABLE IF NOT EXISTS products (
     id VARCHAR(100) PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -51,30 +59,24 @@ CREATE TABLE IF NOT EXISTS products (
     INDEX idx_availability (availability),
     INDEX idx_badge (badge),
     INDEX idx_price (price),
-    INDEX idx_rating (rating),
-    FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE RESTRICT
+    INDEX idx_rating (rating)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Table des utilisateurs
-CREATE TABLE IF NOT EXISTS users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(100) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    role VARCHAR(50) NOT NULL DEFAULT 'admin',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_username (username)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+-- Insertion de l'utilisateur admin par défaut
+-- Username: admin, Password: admin123
+INSERT IGNORE INTO users (username, password, role) VALUES
+('admin', '$2y$12$uoItqyrkbaKSqWa6yypgienjQ03bmLeA9Zhfuou.VSMo3hjbrNo.q', 'admin');
 
 -- Insertion des catégories initiales
-INSERT INTO categories (id, name, description, image, product_count) VALUES
+INSERT IGNORE INTO categories (id, name, description, image, product_count) VALUES
 ('poussettes', 'Poussettes & Sièges Autos', 'Vêtements confortables et stylés pour tous les âges', 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80', 45),
 ('shoes', 'Chaussures', 'Chaussures robustes et confortables pour les petits pieds', 'https://images.unsplash.com/photo-1549298916-b41d501d3772?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80', 32),
 ('toys', 'Jouets', 'Jouets éducatifs et amusants pour stimuler la créativité', 'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80', 28),
 ('accessories', 'Accessoires', 'Accessoires pratiques et élégants pour compléter la tenue', 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80', 23),
 ('baby-care', 'Soins Bébé', 'Produits de soin et d\'hygiène pour les tout-petits', 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80', 19);
 
--- Insertion d'un produit exemple
-INSERT INTO products (
+-- Insertion d'un produit exemple (optionnel)
+INSERT IGNORE INTO products (
     id, name, category, category_id, availability, badge, price, original_price,
     features, rating, review_count, description, short_description, image, images,
     videos, sizes, colors, material, brand, age_range, is_new, discount, discount_percentage, tags
@@ -105,3 +107,4 @@ INSERT INTO products (
     13,
     '["4 saisons", "premium", "bébé"]'
 );
+

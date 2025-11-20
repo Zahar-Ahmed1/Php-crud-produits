@@ -9,7 +9,7 @@
 cd ~/domains/chezlibrairie.com/public_html
 
 # Ou si vous voulez créer un sous-dossier pour l'application
-cd ~/domains/chezlibrairie.com/public_html
+cd ~/domains/annrstore.com/public_html
 mkdir produits
 cd produits
 ```
@@ -19,13 +19,13 @@ cd produits
 **Option A : Via SCP (depuis votre Mac)**
 ```bash
 cd "/Users/zahar/Desktop/dossier sans titre 3/app-php"
-scp -r * u878075774@92.113.18.53:~/domains/chezlibrairie.com/public_html/produits/
+scp -r * u899993703@[votre-serveur]:~/domains/annrstore.com/public_html/produits/
 ```
 
 **Option B : Via FTP/SFTP**
 - Utilisez FileZilla ou un client FTP
 - Connectez-vous avec vos identifiants Hostinger
-- Naviguez vers `domains/chezlibrairie.com/public_html/`
+- Naviguez vers `domains/annrstore.com/public_html/`
 - Créez un dossier `produits` si nécessaire
 - Uploadez tous les fichiers
 
@@ -40,13 +40,14 @@ git clone [votre-repo] produits
 
 ```bash
 # Sur le serveur Hostinger
-cd ~/domains/chezlibrairie.com/public_html/produits
+cd ~/domains/annrstore.com/public_html/produits
 chmod 755 .
 chmod 644 *.php
-chmod 644 *.sql
 chmod 644 .htaccess
 chmod 755 api
 chmod 755 config
+chmod 755 helpers
+chmod 755 middleware
 chmod 755 models
 ```
 
@@ -69,24 +70,34 @@ mysql -u u878075774_prod -p u878075774_produits < database.sql
 
 ### 5. Vérifier la configuration
 
-Le fichier `config/database.php` est déjà configuré avec :
+Le fichier `config/database.php` doit être configuré avec :
 - Host: localhost (correct pour Hostinger)
-- Database: u878075774_produits
-- Username: u878075774_prod
-- Password: (déjà configuré)
+- Database: u899993703_produits
+- Username: u899993703_prod
+- Password: (à configurer si nécessaire)
 
 ### 6. Accéder à l'application
 
-- Interface principale : `https://chezlibrairie.com/produits/`
-- API : `https://chezlibrairie.com/produits/api/products.php`
-- Setup : `https://chezlibrairie.com/produits/setup.php` (à supprimer après installation)
+- **Page de connexion** : `https://annrstore.com/produits/login.php`
+- **Interface principale** : `https://annrstore.com/produits/` (redirige vers login si non connecté)
+- **API Auth** : `https://annrstore.com/produits/api/auth.php`
+- **API Products** : `https://annrstore.com/produits/api/products.php` (nécessite authentification)
+- **Setup** : `https://annrstore.com/produits/setup.php` (à supprimer après installation)
 
-### 7. Sécurité (Important !)
+### 7. Première connexion
+
+1. Accédez à `https://annrstore.com/produits/login.php`
+2. Utilisez les identifiants par défaut :
+   - **Username** : `admin`
+   - **Password** : `admin123`
+3. ⚠️ **Changez le mot de passe après la première connexion !**
+
+### 8. Sécurité (Important !)
 
 Après le déploiement, supprimez ou protégez `setup.php` :
 ```bash
 # Sur le serveur
-cd ~/domains/chezlibrairie.com/public_html/produits
+cd ~/domains/annrstore.com/public_html/produits
 rm setup.php
 # Ou renommez-le
 mv setup.php setup.php.bak
@@ -97,15 +108,47 @@ mv setup.php setup.php.bak
 ```
 ~/domains/chezlibrairie.com/public_html/produits/
 ├── api/
+│   ├── auth.php              ✅ NOUVEAU (API d'authentification)
 │   └── products.php
 ├── config/
-│   └── database.php
+│   ├── database.php
+│   └── jwt.php               ✅ NOUVEAU (Configuration JWT)
+├── helpers/
+│   └── jwt_helper.php        ✅ NOUVEAU (Helper JWT)
+├── middleware/
+│   └── auth_middleware.php   ✅ NOUVEAU (Middleware d'auth)
 ├── models/
-│   └── Product.php
+│   ├── Product.php
+│   └── User.php              ✅ NOUVEAU (Modèle User)
 ├── .htaccess
 ├── index.php
-└── database.sql (peut être supprimé après import)
+├── login.php                 ✅ NOUVEAU (Page de connexion)
+└── setup.php                 (À supprimer après installation)
 ```
+
+## Fichiers à uploader (avec JWT)
+
+### Fichiers principaux :
+- ✅ `index.php` (mis à jour avec authentification)
+- ✅ `login.php` (nouveau)
+- ✅ `.htaccess`
+- ✅ `setup.php`
+
+### Dossiers et fichiers :
+- ✅ `api/auth.php` (nouveau)
+- ✅ `api/products.php` (mis à jour)
+- ✅ `config/database.php`
+- ✅ `config/jwt.php` (nouveau)
+- ✅ `helpers/jwt_helper.php` (nouveau)
+- ✅ `middleware/auth_middleware.php` (nouveau)
+- ✅ `models/Product.php`
+- ✅ `models/User.php` (nouveau)
+
+### Fichiers à NE PAS uploader :
+- ❌ `database.local.php` (pour développement local uniquement)
+- ❌ `README.md`, `DEPLOY.md`, `SECURITY.md` (documentation)
+- ❌ `deploy.sh` (script local)
+- ❌ `database.sql` (peut être supprimé après import)
 
 ## Dépannage
 

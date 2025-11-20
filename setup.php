@@ -6,26 +6,24 @@
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/models/Product.php';
 
-// Configuration de la base de données (à adapter selon vos paramètres)
+// Utiliser la classe Database pour la connexion
+$database = new Database();
+$conn = $database->getConnection();
+
+// Configuration pour l'affichage (récupérée depuis la classe Database)
 $host = "localhost";
-$db_name = "u878075774_produits"; // Nom de votre base de données
-$username = "u878075774_produits"; // Votre nom d'utilisateur (généralement le même que la base)
-$password = ""; // Votre mot de passe
+$db_name = "u899993703_produits";
+$username = "u899993703_prod";
+$password = "***"; // Masqué pour la sécurité
 
 echo "<h2>Configuration de la base de données</h2>";
 echo "<p>Base de données: <strong>$db_name</strong></p>";
 
 // Test de connexion
 try {
-    $conn = new PDO(
-        "mysql:host=$host;dbname=$db_name;charset=utf8mb4",
-        $username,
-        $password,
-        [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-        ]
-    );
+    if (!$conn) {
+        throw new Exception("Impossible de se connecter à la base de données");
+    }
     echo "<p style='color: green;'>✓ Connexion réussie à la base de données</p>";
     
     // Vérifier si la table existe
@@ -58,6 +56,35 @@ try {
         echo "<p style='color: green;'>✓ Table 'products' créée avec succès</p>";
     } else {
         echo "<p style='color: green;'>✓ La table 'products' existe déjà</p>";
+    }
+    
+    // Vérifier si la table users existe
+    $stmt = $conn->query("SHOW TABLES LIKE 'users'");
+    $usersTableExists = $stmt->rowCount() > 0;
+    
+    if (!$usersTableExists) {
+        echo "<p style='color: orange;'>⚠ La table 'users' n'existe pas. Création en cours...</p>";
+        
+        // Créer la table users
+        $createUsersTable = "CREATE TABLE IF NOT EXISTS users (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            username VARCHAR(100) NOT NULL UNIQUE,
+            password VARCHAR(255) NOT NULL,
+            role VARCHAR(50) NOT NULL DEFAULT 'admin',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_username (username)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+        
+        $conn->exec($createUsersTable);
+        echo "<p style='color: green;'>✓ Table 'users' créée avec succès</p>";
+        
+        // Créer un utilisateur admin par défaut
+        $defaultPassword = password_hash('admin123', PASSWORD_DEFAULT);
+        $insertUser = $conn->prepare("INSERT INTO users (username, password, role) VALUES (?, ?, ?)");
+        $insertUser->execute(['admin', $defaultPassword, 'admin']);
+        echo "<p style='color: green;'>✓ Utilisateur admin créé (username: admin, password: admin123)</p>";
+    } else {
+        echo "<p style='color: green;'>✓ La table 'users' existe déjà</p>";
     }
     
     // Vérifier le nombre de produits
@@ -108,8 +135,8 @@ try {
     
     echo "<p><a href='index.php' style='display: inline-block; padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px;'>Accéder à l'application</a></p>";
     
-} catch(PDOException $e) {
+} catch(Exception $e) {
     echo "<p style='color: red;'>✗ Erreur de connexion: " . $e->getMessage() . "</p>";
-    echo "<p>Vérifiez vos paramètres de connexion dans setup.php</p>";
+    echo "<p>Vérifiez vos paramètres de connexion dans config/database.php</p>";
 }
 
